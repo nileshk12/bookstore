@@ -90,7 +90,7 @@ docker-compose down
 ---
 
 ## 📌 Future Improvements
-
+- ADD a Jenkins pipeline for CI
 - Add a database (MongoDB or PostgreSQL)
 - Add user login/authentication
 - Add book edit functionality
