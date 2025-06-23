@@ -71,10 +71,10 @@ jobs:
       - name: Deploy with Docker Compose
         run: |
           echo "Starting app using docker-compose"
-          docker-compose down --volumes || true
-          docker-compose up -d --force-recreate
+          docker compose down --volumes || true
+          docker compose up -d --force-recreate
           sleep 10
           docker-compose ps
 
       - name: Show container logs
-        run: docker-compose logs --tail=30
+        run: docker compose logs --tail=30
