@@ -1,4 +1,5 @@
-name : Bookstore CI/CD with Image Publishing
+name: Bookstore CI/CD with Image Publishing
+
 on:
   push:
     branches: [ master ]
@@ -6,6 +7,7 @@ on:
   pull_request: 
     branches: [ master ]
   workflow_dispatch:
+
 env:
   IMAGE_BACKEND: nileshk12/bookstore-backend
   IMAGE_FRONTEND: nileshk12/bookstore-frontend
@@ -16,61 +18,63 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Login to GHCR
+
+      - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           registry: docker.io
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: Build and push backend image
         uses: docker/build-push-action@v5
         with:
           context: ./backend
           file: ./backend/Dockerfile
           push: true
-          tag: nileshk12/bookstore-backend:latest
+          tags: ${{ env.IMAGE_BACKEND }}:latest
+
       - name: Build and push frontend image
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: true
-          tag: nileshk12/bookstore-frontend:latest
+          tags: ${{ env.IMAGE_FRONTEND }}:latest
+
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/head/master'
-    
+    if: github.ref == 'refs/heads/master'
+
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
-      - name: Login to GHCR
+
+      - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           registry: docker.io
           username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_USERNAME }}
-      - name: Replace build with image name in docker compose
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Replace build blocks in docker-compose
         run: |
-         sed -i 's|build:\s*context: ./backend|image: ${{ env.IMAGE_BACKEND }}:latest|' docker-compose.yml
-         sed -i 's|build:\s*context: ./frontend|image: ${{ env.IMAGE_FRONTEND }}:latest|' docker-compose.yml
-         echo "updated docker compose"
-         cat docker-compose.yml
-      - name: Deploy with Docker compose
+          sed -i 's|build:\s*context: ./backend|image: ${{ env.IMAGE_BACKEND }}:latest|' docker-compose.yml
+          sed -i 's|build:\s*context: ./frontend|image: ${{ env.IMAGE_FRONTEND }}:latest|' docker-compose.yml
+          echo "Updated docker-compose.yml"
+          cat docker-compose.yml
+
+      - name: Deploy with Docker Compose
         run: |
           echo "Starting app using docker-compose"
           docker-compose down --volumes || true
           docker-compose up -d --force-recreate
           sleep 10
           docker-compose ps
-      - name: show container logs
+
+      - name: Show container logs
         run: docker-compose logs --tail=30
-      
-          
-
-
-
-
-          
