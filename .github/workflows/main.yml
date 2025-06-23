@@ -30,14 +30,14 @@ jobs:
           context: ./backend
           file: ./backend/Dockerfile
           push: true
-          tag: ${{ env.IMAGE_BACKEND }}:latest
+          tag: nileshk12/bookstore-backend:latest
       - name: Build and push frontend image
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: true
-          tag: ${{ env.IMAGE_FRONTEND }}
+          tag: nileshk12/bookstore-frontend:latest
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
