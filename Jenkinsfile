@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        COMPOSE_CMD = "docker-compose -f docker-compose.yml"
+        COMPOSE_CMD= "docker-compose -f docker-compose.yml"
     }
     stages {
         stage('Clone') {
