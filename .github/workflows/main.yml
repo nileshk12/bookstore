@@ -7,8 +7,8 @@ on:
     branches: [ master ]
   workflow_dispatch:
 env:
-  IMAGE_BACKEND: ghcr.io/${{ github.repository }}-backend
-  IMAGE_FRONTEND: ghcr.io/${{ github.repository }}-frontend
+  IMAGE_BACKEND: nileshk12/bookstore-backend
+  IMAGE_FRONTEND: nileshk12/bookstore-frontend
 
 jobs:
   build-and-push:
