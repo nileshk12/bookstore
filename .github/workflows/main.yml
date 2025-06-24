@@ -54,27 +54,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
+      - name: Set up SSH access to EC2
+        uses: webfactory/ssh-agent@v0.9.0
         with:
-          registry: docker.io
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Replace build blocks in docker-compose
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+      - name: Deploy to ec2 via ssh
         run: |
-          sed -i 's|build:\s*context: ./backend|image: ${{ env.IMAGE_BACKEND }}:latest|' docker-compose.yml
-          sed -i 's|build:\s*context: ./frontend|image: ${{ env.IMAGE_FRONTEND }}:latest|' docker-compose.yml
-          echo "Updated docker-compose.yml"
-          cat docker-compose.yml
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_HOST }} << 'EOF'
+            cd ~
+            if [ ! -d bookstore ]; then
+              git clone https://github.com/nileshk12/bookstore.git
+            fi
 
-      - name: Deploy with Docker Compose
-        run: |
-          echo "Starting app using docker-compose"
-          docker compose down --volumes || true
-          docker compose up -d --force-recreate
-          sleep 10
-          docker compose ps
+            cd bookstore
+            git pull origin master
 
-      - name: Show container logs
-        run: docker compose logs --tail=30
+            sed -i 's|build:.*backend|image: nileshk12/bookstore-backend:latest|' docker-compose.yml
+            sed -i 's|build:.*backend|image: nileshk12/bookstore-frontend:latest|' docker-compose.yml
+            docker compose down || true
+            docker compose pull
+            docker compose up -d --force-recreate
+          EOF
+
+          
+              
